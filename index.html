@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Centro de Estudiantes - E.P.E.T N°21</title>
+  <link rel="stylesheet" href="css/styles.css">
+</head>
+<body class="page-landing">
+  <header class="header">
+    <div class="container">
+      <h1 class="logo"><a href="index.html" class="logo-wrapper"><img src="assets/logo.png" alt="Delegados E.P.E.T N°21" class="logo-img"></a></h1>
+      <nav class="nav">
+        <a href="index.html" class="active">Inicio</a>
+        <a href="explorar.html">Explorar</a>
+        <a href="enviar-idea.html">Enviar idea</a>
+        <a href="reportar-problema.html">Reportar problema</a>
+        <a href="proyectos.html">Proyectos</a>
+        <a href="contacto.html">Contacto</a>
+        <button type="button" id="theme-toggle" class="theme-toggle" role="switch" aria-checked="true" aria-label="Inicio siempre tiene fondo negro" disabled><span class="theme-toggle-label">black</span><span class="theme-toggle-knob"></span></button>
+      </nav>
+    </div>
+  </header>
+
+  <div id="submerge-overlay" class="submerge-overlay" aria-hidden="true"></div>
+  <div id="loading-screen" class="loading-screen" aria-hidden="true"></div>
+  <main class="main">
+    <section class="landing">
+      <div class="container container-narrow">
+        <a href="explorar.html" class="landing-logo-link" id="landing-logo-link">
+          <img src="assets/logo.png" alt="Delegados E.P.E.T N°21" class="landing-logo">
+        </a>
+        <p class="landing-desc">Plataforma del Centro de Estudiantes de la E.P.E.T N°21. Un espacio para que tu voz sea escuchada. ¿En qué nos beneficia? podés reportar un baño que no funciona, proponer actividades para los recreos, denunciar situaciones de convivencia o contactar a la directiva del centro. Participar nos hace una comunidad más unida. Tocá el logo para continuar.</p>
+      </div>
+    </section>
+  </main>
+
+  <footer class="footer">
+    <div class="container">
+      <p>Centro de Estudiantes - Escuela Técnica</p>
+      <p><a href="admin/index.html" class="footer-admin-link">Acceso administración</a></p>
+    </div>
+  </footer>
+  <script src="js/theme.js"></script>
+  <script>
+    document.getElementById('landing-logo-link').addEventListener('click', function(e) {
+      e.preventDefault();
+      document.body.classList.add('submerging');
+      document.getElementById('submerge-overlay').classList.add('submerge-active');
+      setTimeout(function() {
+        document.getElementById('submerge-overlay').classList.remove('submerge-active');
+        document.getElementById('loading-screen').classList.add('loading-active');
+        setTimeout(function() {
+          window.location.href = 'explorar.html';
+        }, 900);
+      }, 2800);
+    });
+  </script>
+</body>
+</html>

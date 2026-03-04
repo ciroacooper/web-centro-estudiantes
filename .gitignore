@@ -1,0 +1,15 @@
+# Sistema
+.DS_Store
+Thumbs.db
+
+# Dependencias (si algún día usás npm)
+node_modules/
+
+# Entorno / secretos (no subir claves)
+.env
+.env.local
+*.local
+
+# Build (si algún día compilás)
+dist/
+build/

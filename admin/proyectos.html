@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Gestionar proyectos - Centro de Estudiantes</title>
+  <link rel="stylesheet" href="../css/styles.css">
+</head>
+<body>
+  <header class="header">
+    <div class="container">
+      <h1 class="logo"><a href="../index.html" class="logo-wrapper"><img src="../assets/logo.png" alt="Delegados E.P.E.T N°21" class="logo-img"></a></h1>
+      <nav class="nav">
+        <a href="../index.html">Inicio</a>
+        <a href="../explorar.html">Explorar</a>
+        <a href="panel.html">Panel admin</a>
+        <a href="proyectos.html" class="active">Proyectos</a>
+        <a href="papelera.html">Papelera</a>
+        <button type="button" id="theme-toggle" class="theme-toggle" role="switch" aria-checked="false" aria-label="Fondo blanco. Clic para fondo negro"><span class="theme-toggle-label">white</span><span class="theme-toggle-knob"></span></button>
+        <button type="button" class="btn btn-link" id="logout-btn">Cerrar sesión</button>
+      </nav>
+    </div>
+  </header>
+
+  <main class="main">
+    <section class="content-section">
+      <div class="container">
+        <h2>Gestionar proyectos</h2>
+        <p class="intro">Los proyectos que agregues aquí se mostrarán en la página <a href="../proyectos.html">Proyectos</a> del sitio público.</p>
+
+        <button type="button" class="btn btn-primary" id="project-new-btn">+ Nuevo proyecto</button>
+
+        <div id="project-form-container" class="project-form-container hidden">
+          <form id="project-form" class="form form-report">
+            <input type="hidden" id="project-id" value="">
+            <div class="form-report-card">
+              <div class="form-group">
+                <label for="project-title">Título *</label>
+                <input type="text" id="project-title" name="title" required placeholder="Ej: Recreos con música" maxlength="120">
+              </div>
+              <div class="form-group">
+                <label for="project-description">Descripción *</label>
+                <textarea id="project-description" name="description" rows="5" required placeholder="Describe el proyecto..."></textarea>
+              </div>
+              <div class="form-group">
+                <label for="project-status">Estado</label>
+                <select id="project-status" name="status">
+                  <option value="en_curso">En curso</option>
+                  <option value="finalizado">Finalizado</option>
+                  <option value="planificado">Planificado</option>
+                </select>
+              </div>
+              <div class="form-group">
+                <label for="project-meta">Meta (opcional)</label>
+                <input type="text" id="project-meta" name="meta" placeholder="Ej: Inicio: 2025">
+              </div>
+            </div>
+            <div id="project-message" class="form-message" aria-live="polite"></div>
+            <div class="form-actions">
+              <button type="submit" class="btn btn-primary" id="project-submit-btn">Guardar</button>
+              <button type="button" class="btn btn-secondary" id="project-cancel-btn">Cancelar</button>
+            </div>
+          </form>
+        </div>
+
+        <div id="projects-loading" class="loading">Cargando proyectos...</div>
+        <div id="projects-list" class="projects-admin-list"></div>
+        <div id="projects-empty" class="empty-state hidden">No hay proyectos aún. Clic en "Nuevo proyecto" para agregar uno.</div>
+      </div>
+    </section>
+  </main>
+
+  <footer class="footer">
+    <div class="container">
+      <p>Centro de Estudiantes - Escuela Técnica</p>
+    </div>
+  </footer>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="../js/theme.js"></script>
+  <script src="../js/config.js"></script>
+  <script src="../js/admin-auth.js"></script>
+  <script src="../js/admin-projects.js"></script>
+  <script>
+    document.addEventListener('DOMContentLoaded', async () => {
+      const result = await requireAdmin('../admin/index.html');
+      if (!result || result.denied) return;
+
+      document.getElementById('logout-btn').addEventListener('click', () => logout());
+      initAdminProjects();
+    });
+  </script>
+</body>
+</html>

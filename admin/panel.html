@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Panel de administración - Centro de Estudiantes</title>
+  <link rel="stylesheet" href="../css/styles.css">
+</head>
+<body>
+  <header class="header">
+    <div class="container">
+      <h1 class="logo"><a href="../index.html" class="logo-wrapper"><img src="../assets/logo.png" alt="Delegados E.P.E.T N°21" class="logo-img"></a></h1>
+      <nav class="nav">
+        <a href="../index.html">Inicio</a>
+        <a href="../explorar.html">Explorar</a>
+        <a href="panel.html" class="active">Panel admin</a>
+        <a href="proyectos.html">Proyectos</a>
+        <a href="papelera.html">Papelera</a>
+        <button type="button" id="theme-toggle" class="theme-toggle" role="switch" aria-checked="false" aria-label="Fondo blanco. Clic para fondo negro"><span class="theme-toggle-label">white</span><span class="theme-toggle-knob"></span></button>
+        <button type="button" class="btn btn-link" id="logout-btn">Cerrar sesión</button>
+      </nav>
+    </div>
+  </header>
+
+  <main class="main">
+    <section class="content-section">
+      <div class="container">
+        <h2>Gestionar ideas y reclamos</h2>
+
+        <div class="filters">
+          <div class="form-group form-group-inline">
+            <label for="filter-type">Tipo</label>
+            <select id="filter-type">
+              <option value="">Todos</option>
+              <option value="idea">Ideas</option>
+              <option value="problema">Problemas</option>
+            </select>
+          </div>
+          <div class="form-group form-group-inline">
+            <label for="filter-status">Estado</label>
+            <select id="filter-status">
+              <option value="">Todos</option>
+              <option value="pendiente">Pendiente</option>
+              <option value="en_proceso">En proceso</option>
+              <option value="aprobado">Aprobado</option>
+              <option value="rechazado">Rechazado</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="panel-layout">
+          <div class="panel-left">
+            <div id="loading" class="loading">Cargando...</div>
+            <div id="submissions-list" class="submissions-list"></div>
+            <div id="empty-state" class="empty-state hidden">No hay envíos que coincidan con los filtros.</div>
+          </div>
+
+          <div class="panel-right">
+            <div id="admin-info" class="admin-info">
+              <h3>👥 Rol de Administradores/Delegados</h3>
+              <div class="admin-info-content">
+                <p>Como administrador o delegado del Centro de Estudiantes, tu trabajo es fundamental para mantener una comunicación efectiva entre los estudiantes y la institución.</p>
+                
+                <h4>📋 Responsabilidades principales:</h4>
+                <ul>
+                  <li><strong>Revisar y moderar</strong> las ideas y problemas enviados por los estudiantes</li>
+                  <li><strong>Evaluar la viabilidad</strong> de cada propuesta considerando recursos y políticas institucionales</li>
+                  <li><strong>Debatir con otros administradores</strong> sobre la aprobación o rechazo de cada mensaje</li>
+                  <li><strong>Cambiar el estado</strong> de los envíos según el progreso: Pendiente → En proceso → Aprobado/Rechazado</li>
+                  <li><strong>Mantener un registro</strong> del historial de cambios para transparencia</li>
+                </ul>
+
+                <h4>Uso del chat de administradores:</h4>
+                <p>Utiliza el chat para discutir con otros delegados sobre cada mensaje. Esto permite:</p>
+                <ul>
+                  <li>Compartir diferentes perspectivas sobre cada propuesta</li>
+                  <li>Llegar a decisiones consensuadas</li>
+                  <li>Documentar el proceso de toma de decisiones</li>
+                  <li>Mantener un registro de las discusiones para futuras referencias</li>
+                </ul>
+
+                <h4>⚡ Estados de los mensajes:</h4>
+                <ul>
+                  <li><span class="badge badge-pendiente">Pendiente</span>: Mensaje nuevo que requiere revisión</li>
+                  <li><span class="badge badge-en_proceso">En proceso</span>: Mensaje siendo evaluado o implementado</li>
+                  <li><span class="badge badge-aprobado">Aprobado</span>: Mensaje aceptado y en implementación</li>
+                  <li><span class="badge badge-rechazado">Rechazado</span>: Mensaje no aprobado (con justificación en el chat)</li>
+                </ul>
+
+                <p class="admin-info-footer">💡 <strong>Tip:</strong> Selecciona un mensaje de la lista para abrir su chat y comenzar a debatir con otros administradores.</p>
+              </div>
+            </div>
+
+            <div id="chat-container" class="chat-container hidden">
+              <div class="chat-header">
+                <h3 id="chat-submission-title">Chat de administradores</h3>
+                <button type="button" class="btn-close-chat" id="close-chat-btn" aria-label="Cerrar chat">×</button>
+              </div>
+              <div id="chat-submission-info" class="chat-submission-info"></div>
+              
+              <div id="chat-comments-loading" class="loading">Cargando comentarios...</div>
+              <div id="chat-comments-list" class="chat-comments-list"></div>
+              <div id="chat-comments-empty" class="empty-state hidden">No hay comentarios aún. Sé el primero en opinar.</div>
+
+              <form id="chat-comment-form" class="form chat-comment-form">
+                <div class="form-group">
+                  <label for="chat-comment-text">Escribe tu comentario</label>
+                  <textarea id="chat-comment-text" name="comment" placeholder="Escribe tu opinión sobre este mensaje..." required></textarea>
+                  <span class="char-counter"><span id="chat-comment-char-count">0</span> caracteres</span>
+                </div>
+                <div id="chat-comment-message" class="form-message" aria-live="polite"></div>
+                <button type="submit" class="btn btn-primary" id="chat-submit-comment-btn">Enviar comentario</button>
+              </form>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer class="footer">
+    <div class="container">
+      <p>Centro de Estudiantes - Escuela Técnica</p>
+    </div>
+  </footer>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="../js/theme.js"></script>
+  <script src="../js/config.js"></script>
+  <script src="../js/admin-auth.js"></script>
+  <script src="../js/admin-panel.js"></script>
+  <script>
+    document.addEventListener('DOMContentLoaded', async () => {
+      const result = await requireAdmin('../admin/index.html');
+      if (!result || result.denied) return;
+
+      document.getElementById('logout-btn').addEventListener('click', () => logout());
+      initPanel('submissions-list', 'loading', 'empty-state', 'filter-type', 'filter-status');
+    });
+  </script>
+</body>
+</html>

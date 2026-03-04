@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Proyectos - Centro de Estudiantes</title>
+  <link rel="stylesheet" href="css/styles.css">
+</head>
+<body>
+  <header class="header">
+    <div class="container">
+      <h1 class="logo"><a href="index.html" class="logo-wrapper"><img src="assets/logo.png" alt="Delegados E.P.E.T N°21" class="logo-img"></a></h1>
+      <nav class="nav">
+        <a href="index.html">Inicio</a>
+        <a href="explorar.html">Explorar</a>
+        <a href="enviar-idea.html">Enviar idea</a>
+        <a href="reportar-problema.html">Reportar problema</a>
+        <a href="proyectos.html" class="active">Proyectos</a>
+        <a href="contacto.html">Contacto</a>
+        <button type="button" id="theme-toggle" class="theme-toggle" role="switch" aria-checked="false" aria-label="Fondo blanco. Clic para fondo negro"><span class="theme-toggle-label">white</span><span class="theme-toggle-knob"></span></button>
+      </nav>
+    </div>
+  </header>
+
+  <main class="main">
+    <section class="content-section">
+      <div class="container">
+        <h2 class="page-title">Proyectos del Centro de Estudiantes</h2>
+        <p class="intro">Iniciativas y proyectos que lleva adelante el centro de estudiantes para mejorar la escuela.</p>
+
+        <div id="projects-loading" class="loading hidden">Cargando proyectos...</div>
+        <div id="projects-grid" class="projects-grid">
+          <article class="project-card project-card-example" id="project-example">
+            <span class="project-badge-example">Proyecto de ejemplo / prueba</span>
+            <span class="project-status project-status-active">En curso</span>
+            <h3 class="project-title">Recreos con música</h3>
+            <p class="project-desc">Gestionar con preceptoría y dirección la posibilidad de poner música en los recreos en el patio, con una lista colaborativa y volumen moderado. El centro lleva la propuesta y la votación fue positiva en asamblea.</p>
+            <p class="project-meta">Inicio: 2025 · Responsable: Comisión de convivencia</p>
+          </article>
+        </div>
+        <div id="projects-empty" class="empty-state hidden">No hay proyectos publicados aún. Podés <a href="enviar-idea.html">enviar tus ideas</a> para que las tengamos en cuenta.</div>
+        <p class="projects-more" id="projects-more">Los proyectos son gestionados por el centro de estudiantes. Podés <a href="enviar-idea.html">enviar tus ideas</a> para que las tengamos en cuenta.</p>
+      </div>
+    </section>
+  </main>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="js/config.js"></script>
+  <script src="js/projects.js"></script>
+  <script src="js/theme.js"></script>
+  <script>
+    document.addEventListener('DOMContentLoaded', () => loadProjects());
+  </script>
+  <footer class="footer">
+    <div class="container">
+      <p>Centro de Estudiantes - Escuela Técnica</p>
+      <p><a href="admin/index.html" class="footer-admin-link">Acceso administración</a></p>
+    </div>
+  </footer>
+</body>
+</html>

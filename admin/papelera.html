@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Papelera - Centro de Estudiantes</title>
+  <link rel="stylesheet" href="../css/styles.css">
+</head>
+<body>
+  <header class="header">
+    <div class="container">
+      <h1 class="logo"><a href="../index.html" class="logo-wrapper"><img src="../assets/logo.png" alt="Delegados E.P.E.T N°21" class="logo-img"></a></h1>
+      <nav class="nav">
+        <a href="../index.html">Inicio</a>
+        <a href="../explorar.html">Explorar</a>
+        <a href="panel.html">Panel admin</a>
+        <a href="proyectos.html">Proyectos</a>
+        <a href="papelera.html" class="active">Papelera</a>
+        <button type="button" id="theme-toggle" class="theme-toggle" role="switch" aria-checked="false" aria-label="Fondo blanco. Clic para fondo negro"><span class="theme-toggle-label">white</span><span class="theme-toggle-knob"></span></button>
+        <button type="button" class="btn btn-link" id="logout-btn">Cerrar sesión</button>
+      </nav>
+    </div>
+  </header>
+
+  <main class="main">
+    <section class="content-section">
+      <div class="container">
+        <h2>Papelera</h2>
+        <p class="intro">Mensajes borrados. Podés restaurarlos para que vuelvan al panel principal.</p>
+
+        <a href="panel.html" class="link" style="margin-bottom: 1rem; display: inline-block;">← Volver al panel</a>
+
+        <div id="loading" class="loading">Cargando...</div>
+        <div id="submissions-list" class="submissions-list"></div>
+        <div id="empty-state" class="empty-state hidden">No hay mensajes borrados.</div>
+      </div>
+    </section>
+  </main>
+
+  <footer class="footer">
+    <div class="container">
+      <p>Centro de Estudiantes - Escuela Técnica</p>
+    </div>
+  </footer>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="../js/theme.js"></script>
+  <script src="../js/config.js"></script>
+  <script src="../js/admin-auth.js"></script>
+  <script src="../js/admin-panel.js"></script>
+  <script>
+    document.addEventListener('DOMContentLoaded', async () => {
+      const result = await requireAdmin('../admin/index.html');
+      if (!result || result.denied) return;
+
+      document.getElementById('logout-btn').addEventListener('click', () => logout());
+      initPapelera('submissions-list', 'loading', 'empty-state');
+    });
+  </script>
+</body>
+</html>

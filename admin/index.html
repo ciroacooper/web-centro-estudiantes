@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Administración - Centro de Estudiantes</title>
+  <link rel="stylesheet" href="../css/styles.css">
+</head>
+<body>
+  <header class="header">
+    <div class="container">
+      <h1 class="logo"><a href="../index.html" class="logo-wrapper"><img src="../assets/logo.png" alt="Delegados E.P.E.T N°21" class="logo-img"></a></h1>
+      <nav class="nav">
+        <a href="../index.html">Inicio</a>
+        <a href="../explorar.html">Explorar</a>
+        <a href="panel.html">Panel admin</a>
+        <a href="proyectos.html">Proyectos</a>
+        <a href="papelera.html">Papelera</a>
+        <button type="button" id="theme-toggle" class="theme-toggle" role="switch" aria-checked="false" aria-label="Fondo blanco. Clic para fondo negro"><span class="theme-toggle-label">white</span><span class="theme-toggle-knob"></span></button>
+      </nav>
+    </div>
+  </header>
+
+  <main class="main">
+    <section class="content-section admin-section">
+      <div class="container container-narrow">
+        <div id="login-container">
+          <h2>Acceso administración</h2>
+          <p class="intro">Iniciá sesión para gestionar ideas y reclamos.</p>
+
+          <form id="login-form" class="form">
+            <div class="form-group">
+              <label for="email">Email</label>
+              <input type="email" id="email" name="email" required autocomplete="email">
+            </div>
+            <div class="form-group">
+              <label for="password">Contraseña</label>
+              <input type="password" id="password" name="password" required autocomplete="current-password">
+            </div>
+            <div id="login-message" class="form-message" aria-live="polite"></div>
+            <button type="submit" class="btn btn-primary" id="login-btn">Iniciar sesión</button>
+          </form>
+        </div>
+
+        <div id="denied-container" class="hidden">
+          <h2>Acceso denegado</h2>
+          <p>No tenés permisos para acceder al panel de administración.</p>
+          <button type="button" class="btn btn-secondary" id="logout-btn">Cerrar sesión</button>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer class="footer">
+    <div class="container">
+      <p>Centro de Estudiantes - Escuela Técnica</p>
+    </div>
+  </footer>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="../js/theme.js"></script>
+  <script src="../js/config.js"></script>
+  <script src="../js/admin-auth.js"></script>
+  <script>
+    document.addEventListener('DOMContentLoaded', async () => {
+      if (typeof TEST_MODE !== 'undefined' && TEST_MODE) {
+        window.location.href = 'panel.html';
+        return;
+      }
+      const loginContainer = document.getElementById('login-container');
+      const deniedContainer = document.getElementById('denied-container');
+      const loginForm = document.getElementById('login-form');
+      const loginMessage = document.getElementById('login-message');
+
+      function showMessage(msg, isError) {
+        loginMessage.textContent = msg;
+        loginMessage.className = 'form-message ' + (isError ? 'form-message-error' : 'form-message-success');
+      }
+
+      const client = getSupabase();
+      const { data: { user } } = await client.auth.getUser();
+
+      if (user) {
+        const isAdmin = await checkIsAdmin();
+        if (isAdmin) {
+          window.location.href = 'panel.html';
+          return;
+        }
+        loginContainer.classList.add('hidden');
+        deniedContainer.classList.remove('hidden');
+        document.getElementById('logout-btn').addEventListener('click', () => logout());
+        return;
+      }
+
+      loginForm.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const email = document.getElementById('email').value.trim();
+        const password = document.getElementById('password').value;
+        document.getElementById('login-btn').disabled = true;
+        showMessage('Iniciando sesión...', false);
+
+        try {
+          await login(email, password);
+          const isAdmin = await checkIsAdmin();
+          if (isAdmin) {
+            window.location.href = 'panel.html';
+          } else {
+            loginContainer.classList.add('hidden');
+            deniedContainer.classList.remove('hidden');
+            document.getElementById('logout-btn').addEventListener('click', () => logout());
+          }
+        } catch (err) {
+          showMessage(err.message || 'Error al iniciar sesión.', true);
+        } finally {
+          document.getElementById('login-btn').disabled = false;
+        }
+      });
+    });
+  </script>
+</body>
+</html>

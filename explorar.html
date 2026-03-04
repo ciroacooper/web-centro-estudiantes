@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Explorar - Centro de Estudiantes</title>
+  <link rel="stylesheet" href="css/styles.css">
+</head>
+<body>
+  <header class="header">
+    <div class="container">
+      <h1 class="logo"><a href="index.html" class="logo-wrapper"><img src="assets/logo.png" alt="Delegados E.P.E.T N°21" class="logo-img"></a></h1>
+      <nav class="nav">
+        <a href="index.html">Inicio</a>
+        <a href="explorar.html" class="active">Explorar</a>
+        <a href="enviar-idea.html">Enviar idea</a>
+        <a href="reportar-problema.html">Reportar problema</a>
+        <a href="proyectos.html">Proyectos</a>
+        <a href="contacto.html">Contacto</a>
+        <button type="button" id="theme-toggle" class="theme-toggle" role="switch" aria-checked="false" aria-label="Fondo blanco. Clic para fondo negro"><span class="theme-toggle-label">white</span><span class="theme-toggle-knob"></span></button>
+      </nav>
+    </div>
+  </header>
+
+  <main class="main">
+    <section class="hero">
+      <div class="container">
+        <h2 class="page-title">Centro de Estudiantes de la <span class="epet-rojo">E.P.E.T N°21</span></h2>
+        <p>Tu voz importa. Envía ideas, reporta problemas y participa en los proyectos de la escuela.</p>
+        <div class="hero-actions">
+          <a href="enviar-idea.html" class="btn btn-primary">Enviar una idea</a>
+          <a href="reportar-problema.html" class="btn btn-secondary">Reportar un problema</a>
+        </div>
+      </div>
+    </section>
+
+    <section class="features">
+      <div class="container">
+        <h3 class="page-title">¿Para qué sirve cada opción?</h3>
+        <p class="features-intro">Elegí según lo que necesites hacer. Cada opción tiene un propósito claro:</p>
+        <div class="features-grid">
+          <article class="feature-card">
+            <h4>Enviar idea</h4>
+            <p>Comparte propuestas para mejorar la escuela. Enviá tu idea de forma anónima y será revisada por el centro de estudiantes.</p>
+            <a href="enviar-idea.html" class="btn btn-primary">Enviar idea</a>
+          </article>
+          <article class="feature-card">
+            <h4>Reportar problema</h4>
+            <p>Informa sobre situaciones que necesiten atención (instalaciones, convivencia, etc.). El reporte es anónimo.</p>
+            <a href="reportar-problema.html" class="btn btn-secondary">Reportar problema</a>
+          </article>
+          <article class="feature-card">
+            <h4>Contacto</h4>
+            <p>Comunicate con el centro de estudiantes para consultas generales. También podés acercarte a tu delegado/a del curso o a algún miembro de la directiva del centro.</p>
+            <a href="contacto.html" class="btn btn-primary">Contacto</a>
+          </article>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <script src="js/theme.js"></script>
+  <footer class="footer">
+    <div class="container">
+      <p>Centro de Estudiantes - Escuela Técnica</p>
+      <p><a href="admin/index.html" class="footer-admin-link">Acceso administración</a></p>
+    </div>
+  </footer>
+</body>
+</html>

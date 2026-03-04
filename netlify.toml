@@ -1,0 +1,12 @@
+# Configuración para Netlify
+# Sitio estático - Centro de Estudiantes
+
+[build]
+  publish = "."
+  # No hay comando de build (HTML/CSS/JS puro)
+
+# Redirección para rutas del admin (por si se usa /admin sin index.html)
+[[redirects]]
+  from = "/admin"
+  to = "/admin/"
+  status = 302

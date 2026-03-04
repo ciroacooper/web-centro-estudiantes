@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Detalle del envío - Centro de Estudiantes</title>
+  <link rel="stylesheet" href="../css/styles.css">
+</head>
+<body>
+  <header class="header">
+    <div class="container">
+      <h1 class="logo"><a href="../index.html" class="logo-wrapper"><img src="../assets/logo.png" alt="Delegados E.P.E.T N°21" class="logo-img"></a></h1>
+      <nav class="nav">
+        <a href="../index.html">Inicio</a>
+        <a href="../explorar.html">Explorar</a>
+        <a href="panel.html">Panel admin</a>
+        <a href="proyectos.html">Proyectos</a>
+        <a href="papelera.html">Papelera</a>
+        <button type="button" id="theme-toggle" class="theme-toggle" role="switch" aria-checked="false" aria-label="Fondo blanco. Clic para fondo negro"><span class="theme-toggle-label">white</span><span class="theme-toggle-knob"></span></button>
+        <button type="button" class="btn btn-link" id="logout-btn">Cerrar sesión</button>
+      </nav>
+    </div>
+  </header>
+
+  <main class="main">
+    <section class="content-section">
+      <div class="container container-narrow">
+        <a href="panel.html" class="back-link">&larr; Volver al panel</a>
+
+        <div id="loading" class="loading">Cargando...</div>
+        <div id="detail-container" class="detail-container hidden">
+          <div class="detail-meta">
+            <span id="detail-type" class="badge"></span>
+            <span id="detail-status" class="badge badge-status"></span>
+            <span id="detail-date" class="detail-date"></span>
+          </div>
+          <div class="detail-content">
+            <h3>Contenido (solo lectura)</h3>
+            <div id="detail-content-text" class="detail-content-text"></div>
+          </div>
+
+          <form id="status-form" class="form">
+            <div class="form-group">
+              <label for="status-select">Cambiar estado</label>
+              <select id="status-select">
+                <option value="pendiente">Pendiente</option>
+                <option value="en_proceso">En proceso</option>
+                <option value="aprobado">Aprobado</option>
+                <option value="rechazado">Rechazado</option>
+              </select>
+            </div>
+            <div id="status-message" class="form-message" aria-live="polite"></div>
+            <button type="submit" class="btn btn-primary" id="save-status-btn">Guardar estado</button>
+          </form>
+
+          <div class="history-section">
+            <h3>Historial de cambios</h3>
+            <div id="history-list" class="history-list"></div>
+          </div>
+
+          <div class="forum-section">
+            <div class="forum-header">
+              <h3>Chat de administradores</h3>
+              <p class="forum-description">Debate con otros administradores sobre si aprobar este mensaje o no.</p>
+            </div>
+            
+            <div id="comments-loading" class="loading">Cargando comentarios...</div>
+            <div id="comments-list" class="comments-list"></div>
+            <div id="comments-empty" class="empty-state hidden">No hay comentarios aún. Sé el primero en opinar.</div>
+
+            <form id="comment-form" class="form comment-form">
+              <div class="form-group">
+                <label for="comment-text">Escribe tu comentario</label>
+                <textarea id="comment-text" name="comment" placeholder="Escribe tu opinión sobre este mensaje..." required></textarea>
+                <span class="char-counter"><span id="comment-char-count">0</span> caracteres</span>
+              </div>
+              <div id="comment-message" class="form-message" aria-live="polite"></div>
+              <button type="submit" class="btn btn-primary" id="submit-comment-btn">Enviar comentario</button>
+            </form>
+          </div>
+        </div>
+        <div id="not-found" class="empty-state hidden">Envío no encontrado.</div>
+      </div>
+    </section>
+  </main>
+
+  <footer class="footer">
+    <div class="container">
+      <p>Centro de Estudiantes - Escuela Técnica</p>
+    </div>
+  </footer>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="../js/theme.js"></script>
+  <script src="../js/config.js"></script>
+  <script src="../js/admin-auth.js"></script>
+  <script src="../js/admin-panel.js"></script>
+  <script>
+    document.addEventListener('DOMContentLoaded', async () => {
+      const result = await requireAdmin('../admin/index.html');
+      if (!result || result.denied) return;
+
+      document.getElementById('logout-btn').addEventListener('click', () => logout());
+
+      const params = new URLSearchParams(window.location.search);
+      const id = params.get('id');
+      if (!id) {
+        document.getElementById('loading').classList.add('hidden');
+        document.getElementById('not-found').classList.remove('hidden');
+        return;
+      }
+
+      initDetalle(id, 'loading', 'detail-container', 'not-found', 'status-form', 'status-select', 'save-status-btn', 'status-message');
+    });
+  </script>
+</body>
+</html>
