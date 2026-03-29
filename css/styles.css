@@ -1371,3 +1371,43 @@ body.submerging .header {
   gap: 0.5rem;
   flex-wrap: wrap;
 }
+
+/* ========== Descargar app (PWA) ========== */
+.install-app-section .install-card {
+  background: var(--color-bg-card, #fff);
+  border: 2px solid var(--color-teal-border, #e2e8f0);
+  border-radius: var(--radius);
+  padding: 1.25rem 1.5rem;
+  margin-bottom: 1.25rem;
+  box-shadow: var(--shadow);
+}
+.install-app-section .install-card-primary {
+  border-color: var(--color-primary, #2563eb);
+}
+.install-app-section .install-card-muted {
+  opacity: 0.95;
+  font-size: 0.95rem;
+}
+.install-app-section .install-card h3 {
+  margin: 0 0 0.75rem;
+  font-size: 1.1rem;
+}
+.install-app-section .install-hint {
+  margin: 0 0 1rem;
+  line-height: 1.5;
+}
+.install-app-section .install-btn {
+  margin-top: 0.25rem;
+}
+.install-steps {
+  margin: 0;
+  padding-left: 1.25rem;
+  line-height: 1.6;
+}
+.install-steps li {
+  margin-bottom: 0.5rem;
+}
+body.theme-dark .install-app-section .install-card {
+  background: var(--color-bg-card);
+  border-color: var(--color-border);
+}

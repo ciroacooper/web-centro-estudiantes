@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Descargar app - Centro de Estudiantes</title>
+  <link rel="manifest" href="/manifest.json">
+  <meta name="theme-color" content="#2563eb">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-title" content="Centro EPET">
+  <link rel="icon" type="image/png" sizes="192x192" href="/assets/icons/icon-192.png">
+  <link rel="apple-touch-icon" href="/assets/icons/icon-192.png">
+  <link rel="stylesheet" href="css/styles.css">
+</head>
+<body>
+  <header class="header">
+    <div class="container">
+      <h1 class="logo"><a href="index.html" class="logo-wrapper"><img src="assets/logo.png" alt="Delegados E.P.E.T N°21" class="logo-img"></a></h1>
+      <nav class="nav">
+        <a href="index.html">Inicio</a>
+        <a href="explorar.html">Explorar</a>
+        <a href="enviar-idea.html">Enviar idea</a>
+        <a href="reportar-problema.html">Reportar problema</a>
+        <a href="proyectos.html">Proyectos</a>
+        <a href="descargar-app.html" class="active">Descargar app</a>
+        <a href="contacto.html">Contacto</a>
+        <button type="button" id="theme-toggle" class="theme-toggle" role="switch" aria-checked="false" aria-label="Fondo blanco. Clic para fondo negro"><span class="theme-toggle-label">white</span><span class="theme-toggle-knob"></span></button>
+      </nav>
+    </div>
+  </header>
+
+  <main class="main">
+    <section class="content-section install-app-section">
+      <div class="container container-narrow">
+        <h2 class="page-title">Descargar la app</h2>
+        <p class="intro">Instalá el sitio del Centro de Estudiantes en tu celular como una aplicación. Es la misma web, más rápida de abrir desde el icono en la pantalla de inicio.</p>
+
+        <div class="install-card install-card-primary">
+          <h3>Android (Chrome)</h3>
+          <p id="pwa-install-hint" class="install-hint">Si tu navegador lo permite, aparecerá un botón abajo. Si no, abrí el menú <strong>⋮</strong> y elegí <strong>Instalar app</strong> o <strong>Agregar a la pantalla de inicio</strong>.</p>
+          <button type="button" id="pwa-install-btn" class="btn btn-primary install-btn" hidden>Instalar app</button>
+        </div>
+
+        <div class="install-card">
+          <h3>iPhone o iPad (Safari)</h3>
+          <ol class="install-steps">
+            <li>Abrí esta página en <strong>Safari</strong>.</li>
+            <li>Tocá el botón <strong>Compartir</strong> (cuadrado con flecha hacia arriba).</li>
+            <li>Elegí <strong>Añadir a inicio</strong> y confirmá.</li>
+          </ol>
+        </div>
+
+        <div class="install-card">
+          <h3>Google Play</h3>
+          <p>Cuando la app esté publicada en la Play Store, acá podés poner el enlace directo. Por ahora usá la instalación desde el navegador como arriba.</p>
+          <!-- Reemplazá # por la URL de Play cuando la tengas:
+          <p><a class="btn btn-primary" href="#" rel="noopener">Abrir en Google Play</a></p>
+          -->
+        </div>
+
+        <div class="install-card install-card-muted">
+          <h3>Desde la computadora</h3>
+          <p>Escaneá el QR del cartel del centro o abrí el sitio en el celular y seguí los pasos de Android o iPhone.</p>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <script src="js/theme.js"></script>
+  <footer class="footer">
+    <div class="container">
+      <p>Centro de Estudiantes - Escuela Técnica</p>
+      <p><a href="admin/index.html" class="footer-admin-link">Acceso administración</a></p>
+    </div>
+  </footer>
+  <script src="/js/pwa.js"></script>
+  <script src="js/install-app.js"></script>
+</body>
+</html>
