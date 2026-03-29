@@ -684,6 +684,12 @@ body.submerging .header {
   margin-top: auto;
   align-self: flex-start;
 }
+/* Tarjeta “Próximamente”: mismo aspecto que el botón secundario pero sin enlace */
+.feature-card-soon-btn {
+  cursor: default;
+  pointer-events: none;
+  user-select: none;
+}
 
 /* ========== Page title (estilo pill como botones) ========== */
 .page-title {
