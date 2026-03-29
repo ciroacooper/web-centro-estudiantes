@@ -1380,6 +1380,7 @@ body.submerging .header {
   padding: 1.25rem 1.5rem;
   margin-bottom: 1.25rem;
   box-shadow: var(--shadow);
+  color: var(--color-text);
 }
 .install-app-section .install-card-primary {
   border-color: var(--color-primary, #2563eb);
@@ -1391,10 +1392,19 @@ body.submerging .header {
 .install-app-section .install-card h3 {
   margin: 0 0 0.75rem;
   font-size: 1.1rem;
+  color: var(--color-text);
+}
+.install-app-section .install-card p {
+  color: var(--color-text);
 }
 .install-app-section .install-hint {
   margin: 0 0 1rem;
   line-height: 1.5;
+  color: #334155;
+}
+.install-app-section .install-card strong {
+  color: var(--color-text);
+  font-weight: 600;
 }
 .install-app-section .install-btn {
   margin-top: 0.25rem;
@@ -1403,11 +1413,32 @@ body.submerging .header {
   margin: 0;
   padding-left: 1.25rem;
   line-height: 1.6;
+  color: var(--color-text);
 }
 .install-steps li {
   margin-bottom: 0.5rem;
 }
+/* Tema oscuro: mismas tarjetas que el resto del sitio (fondo oscuro, texto claro) */
 body.theme-dark .install-app-section .install-card {
-  background: var(--color-bg-card);
-  border-color: var(--color-border);
+  background: #1e293b;
+  border-color: var(--color-primary);
+  color: #e2e8f0;
+}
+body.theme-dark .install-app-section .install-card h3 {
+  color: var(--color-primary);
+}
+body.theme-dark .install-app-section .install-card p,
+body.theme-dark .install-app-section .install-hint,
+body.theme-dark .install-app-section .install-steps,
+body.theme-dark .install-app-section .install-steps li {
+  color: rgba(226, 232, 240, 0.92);
+}
+body.theme-dark .install-app-section .install-card strong {
+  color: #f8fafc;
+}
+body.theme-dark .install-app-section .install-card-muted {
+  opacity: 1;
+}
+body.theme-dark .install-app-section .install-card-muted p {
+  color: rgba(226, 232, 240, 0.85);
 }
