@@ -17,9 +17,9 @@ const TYPE_LABELS = {
 
 /** Datos de demostración para modo prueba sin Supabase configurado */
 const DEMO_SUBMISSIONS = [
-  { id: 'demo-1', type: 'idea', content: 'Proponer más actividades recreativas en los recreos.', status: 'pendiente', created_at: new Date().toISOString(), deleted_at: null },
-  { id: 'demo-2', type: 'problema', content: 'El baño del primer piso tiene una canilla que gotea.', status: 'en_proceso', created_at: new Date(Date.now() - 86400000).toISOString(), deleted_at: null },
-  { id: 'demo-3', type: 'idea', content: 'Crear un espacio de estudio silencioso en la biblioteca.', status: 'aprobado', created_at: new Date(Date.now() - 172800000).toISOString(), deleted_at: null }
+  { id: 'demo-1', type: 'idea', content: 'Proponer más actividades recreativas en los recreos.', status: 'pendiente', created_at: new Date().toISOString(), deleted_at: null, image_urls: null },
+  { id: 'demo-2', type: 'problema', content: 'El baño del primer piso tiene una canilla que gotea.', status: 'en_proceso', created_at: new Date(Date.now() - 86400000).toISOString(), deleted_at: null, image_urls: null },
+  { id: 'demo-3', type: 'idea', content: 'Crear un espacio de estudio silencioso en la biblioteca.', status: 'aprobado', created_at: new Date(Date.now() - 172800000).toISOString(), deleted_at: null, image_urls: null }
 ];
 
 function formatDate(isoString) {
@@ -51,7 +51,7 @@ async function initPanel(listId, loadingId, emptyId, filterTypeId, filterStatusI
     const client = getSupabase();
     let query = client
       .from('submissions')
-      .select('id, type, content, status, created_at, deleted_at')
+      .select('id, type, content, status, created_at, deleted_at, image_urls')
       .is('deleted_at', null)
       .order('created_at', { ascending: false });
 
@@ -99,6 +99,7 @@ async function initPanel(listId, loadingId, emptyId, filterTypeId, filterStatusI
         <div class="submission-card-header">
           <span class="badge badge-${s.type}">${TYPE_LABELS[s.type] || s.type}</span>
           <span class="badge badge-status badge-${s.status}">${STATUS_LABELS[s.status] || s.status}</span>
+          ${!isDeleted && s.image_urls && s.image_urls.length ? `<span class="badge badge-photos" title="Fotos adjuntas">📷 ${s.image_urls.length}</span>` : ''}
           ${isDeleted ? '<span class="badge badge-deleted">Borrado</span>' : ''}
           <span class="submission-date">${formatDate(s.created_at)}</span>
         </div>
@@ -217,7 +218,7 @@ async function initDetalle(
     submission = DEMO_SUBMISSIONS.find(s => s.id === id);
     error = submission ? null : { message: 'No encontrado' };
   } else {
-    const result = await client.from('submissions').select('id, type, content, status, created_at, deleted_at').eq('id', id).single();
+    const result = await client.from('submissions').select('id, type, content, status, created_at, deleted_at, image_urls').eq('id', id).single();
     submission = result.data;
     error = result.error;
   }
@@ -243,6 +244,29 @@ async function initDetalle(
   statusSelect.value = submission.status;
 
   const isDeleted = !!submission.deleted_at;
+  const detailImagesEl = document.getElementById('detail-images');
+  if (detailImagesEl) {
+    detailImagesEl.innerHTML = '';
+    if (!isDeleted && submission.image_urls && submission.image_urls.length) {
+      detailImagesEl.classList.remove('hidden');
+      submission.image_urls.forEach((url) => {
+        const a = document.createElement('a');
+        a.href = url;
+        a.target = '_blank';
+        a.rel = 'noopener noreferrer';
+        a.className = 'detail-image-link';
+        const img = document.createElement('img');
+        img.src = url;
+        img.alt = 'Foto del reporte';
+        img.loading = 'lazy';
+        img.className = 'detail-image-thumb';
+        a.appendChild(img);
+        detailImagesEl.appendChild(a);
+      });
+    } else {
+      detailImagesEl.classList.add('hidden');
+    }
+  }
   if (detailMeta && isDeleted) {
     const badgeDeleted = document.createElement('span');
     badgeDeleted.className = 'badge badge-deleted';
@@ -692,6 +716,7 @@ function openChat(submission, client = null) {
       <div class="chat-submission-meta">
         <span class="badge badge-${submission.type}">${TYPE_LABELS[submission.type] || submission.type}</span>
         <span class="badge badge-status badge-${submission.status}">${STATUS_LABELS[submission.status] || submission.status}</span>
+        ${submission.image_urls && submission.image_urls.length ? `<span class="badge badge-photos" title="Fotos adjuntas">📷 ${submission.image_urls.length}</span>` : ''}
         <span class="chat-submission-date">${formatDate(submission.created_at)}</span>
       </div>
       <p class="chat-submission-content">${escapeHtml(preview)}</p>
@@ -917,7 +942,7 @@ async function initPapelera(listId, loadingId, emptyId) {
 
     const { data, error } = await client
       .from('submissions')
-      .select('id, type, content, status, created_at, deleted_at')
+      .select('id, type, content, status, created_at, deleted_at, image_urls')
       .not('deleted_at', 'is', null)
       .order('deleted_at', { ascending: false });
 

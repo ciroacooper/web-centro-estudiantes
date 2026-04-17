@@ -165,15 +165,127 @@ function showMessage(elementId, message, isError = false) {
  */
 const SUBMIT_COOLDOWN_MS = 5000; // Evita spam: mínimo 5 segundos entre envíos
 
-function initForm(type, formId, contentId, charCountId, submitBtnId) {
+/** Opciones solo para type === 'problema': fotos desde galería o cámara */
+const MAX_REPORT_IMAGES = 3;
+const MAX_IMAGE_BYTES_BEFORE_COMPRESS = 8 * 1024 * 1024;
+
+/**
+ * Comprime una imagen a JPEG (ancho máx. 1920 px) para ahorrar datos en celular
+ */
+function compressImageToJpegBlob(file, maxDim, quality) {
+  return new Promise((resolve, reject) => {
+    const img = new Image();
+    const url = URL.createObjectURL(file);
+    img.onload = () => {
+      URL.revokeObjectURL(url);
+      let w = img.naturalWidth;
+      let h = img.naturalHeight;
+      if (w > maxDim || h > maxDim) {
+        if (w >= h) {
+          h = Math.round((h * maxDim) / w);
+          w = maxDim;
+        } else {
+          w = Math.round((w * maxDim) / h);
+          h = maxDim;
+        }
+      }
+      const canvas = document.createElement('canvas');
+      canvas.width = w;
+      canvas.height = h;
+      const ctx = canvas.getContext('2d');
+      if (!ctx) {
+        reject(new Error('No se pudo procesar la imagen'));
+        return;
+      }
+      ctx.drawImage(img, 0, 0, w, h);
+      canvas.toBlob(
+        (blob) => {
+          if (blob) resolve(blob);
+          else reject(new Error('No se pudo comprimir la imagen'));
+        },
+        'image/jpeg',
+        quality
+      );
+    };
+    img.onerror = () => {
+      URL.revokeObjectURL(url);
+      reject(new Error('No se pudo leer la imagen'));
+    };
+    img.src = url;
+  });
+}
+
+async function uploadReportImagesToStorage(client, files) {
+  const urls = [];
+  for (let i = 0; i < files.length; i++) {
+    const file = files[i];
+    if (!file.type.startsWith('image/')) {
+      throw new Error('Solo se permiten archivos de imagen (JPEG, PNG, WebP, GIF).');
+    }
+    if (file.size > MAX_IMAGE_BYTES_BEFORE_COMPRESS) {
+      throw new Error('Alguna imagen es demasiado grande (máx. 8 MB antes de comprimir).');
+    }
+    const isGif = file.type === 'image/gif';
+    const body = isGif ? file : await compressImageToJpegBlob(file, 1920, 0.82);
+    const ext = isGif ? 'gif' : 'jpg';
+    const contentType = isGif ? 'image/gif' : 'image/jpeg';
+    const id =
+      typeof crypto !== 'undefined' && crypto.randomUUID
+        ? crypto.randomUUID()
+        : `${Date.now()}-${i}-${Math.random().toString(36).slice(2)}`;
+    const path = `reports/${id}.${ext}`;
+    const { error: upErr } = await client.storage.from('report-images').upload(path, body, {
+      contentType,
+      upsert: false
+    });
+    if (upErr) {
+      if (upErr.message && upErr.message.includes('Bucket not found')) {
+        throw new Error(
+          'Falta configurar el bucket de fotos en Supabase. Ejecutá supabase/storage-report-images.sql y creá el bucket report-images.'
+        );
+      }
+      throw new Error(upErr.message || 'Error al subir una foto');
+    }
+    const { data: pub } = client.storage.from('report-images').getPublicUrl(path);
+    if (pub && pub.publicUrl) urls.push(pub.publicUrl);
+  }
+  return urls;
+}
+
+/**
+ * @param {object} [imageOptions] - solo para problemas: { inputId, previewId }
+ */
+function initForm(type, formId, contentId, charCountId, submitBtnId, imageOptions) {
   const form = document.getElementById(formId);
   const contentInput = document.getElementById(contentId);
   const charCountSpan = document.getElementById(charCountId);
   const submitBtn = document.getElementById(submitBtnId);
+  const imageInput = imageOptions && imageOptions.inputId ? document.getElementById(imageOptions.inputId) : null;
+  const previewEl = imageOptions && imageOptions.previewId ? document.getElementById(imageOptions.previewId) : null;
 
   if (!form || !contentInput || !charCountSpan || !submitBtn) return;
 
   let lastSubmitTime = 0;
+
+  function renderImagePreview() {
+    if (!previewEl || !imageInput) return;
+    previewEl.innerHTML = '';
+    const files = Array.from(imageInput.files || []);
+    files.forEach((f) => {
+      const wrap = document.createElement('div');
+      wrap.className = 'report-image-preview-item';
+      const img = document.createElement('img');
+      img.alt = '';
+      img.src = URL.createObjectURL(f);
+      wrap.appendChild(img);
+      previewEl.appendChild(wrap);
+    });
+    previewEl.classList.toggle('hidden', files.length === 0);
+  }
+
+  if (imageInput && type === 'problema') {
+    imageInput.addEventListener('change', renderImagePreview);
+  }
 
   // Contador de caracteres y validación en tiempo real
   contentInput.addEventListener('input', () => {
@@ -210,10 +322,19 @@ function initForm(type, formId, contentId, charCountId, submitBtnId) {
       return;
     }
 
+    let imageFiles = [];
+    if (type === 'problema' && imageInput) {
+      imageFiles = Array.from(imageInput.files || []);
+      if (imageFiles.length > MAX_REPORT_IMAGES) {
+        showMessage('form-message', `Podés adjuntar hasta ${MAX_REPORT_IMAGES} fotos.`, true);
+        return;
+      }
+    }
+
     // Guardar el contenido validado (la sanitización se hace al mostrar en el admin)
     const contentToSend = validation.value;
     submitBtn.disabled = true;
-    showMessage('form-message', 'Enviando...', false);
+    showMessage('form-message', imageFiles.length ? 'Subiendo fotos...' : 'Enviando...', false);
 
     try {
       if (typeof supabase === 'undefined') {
@@ -226,17 +347,31 @@ function initForm(type, formId, contentId, charCountId, submitBtnId) {
 
       const client = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
-      const { error } = await client
-        .from('submissions')
-        .insert({
-          type,
-          content: contentToSend,
-          status: 'pendiente'
-        });
+      let imageUrls = [];
+      if (imageFiles.length) {
+        showMessage('form-message', 'Subiendo fotos...', false);
+        imageUrls = await uploadReportImagesToStorage(client, imageFiles);
+      }
+
+      const row = {
+        type,
+        content: contentToSend,
+        status: 'pendiente'
+      };
+      if (type === 'problema' && imageUrls.length) {
+        row.image_urls = imageUrls;
+      }
+
+      const { error } = await client.from('submissions').insert(row);
 
       if (error) {
         if (error.code === '42P01') {
           throw new Error('La tabla "submissions" no existe. Ejecutá supabase/schema.sql en el SQL Editor de Supabase.');
+        }
+        if (error.message && error.message.includes('image_urls')) {
+          throw new Error(
+            'Falta la columna image_urls en la tabla. Ejecutá supabase/submissions-image-urls.sql en Supabase.'
+          );
         }
         if (error.code === 'PGRST301' || error.message?.includes('JWT')) {
           throw new Error('La anon key es inválida. Verificá js/config.js con la clave de Settings > API en Supabase.');
@@ -248,6 +383,10 @@ function initForm(type, formId, contentId, charCountId, submitBtnId) {
       lastSubmitTime = Date.now();
       contentInput.value = '';
       charCountSpan.textContent = '0';
+      if (imageInput) {
+        imageInput.value = '';
+        renderImagePreview();
+      }
     } catch (err) {
       console.error('Error al enviar:', err);
       let msg = err.message || 'Hubo un error al enviar. Intentá de nuevo más tarde.';

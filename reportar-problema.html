@@ -36,7 +36,7 @@
           <strong>Para que el envío funcione</strong>, abrí el sitio desde un servidor. En la carpeta del proyecto ejecutá <code>node server.js</code> y luego abrí <a href="http://localhost:3000/reportar-problema.html">http://localhost:3000/reportar-problema.html</a> en el navegador.
         </div>
         <h2 class="page-title">Reportar un problema</h2>
-        <p class="intro">Informá sobre una situación que necesite atención. El reporte es anónimo y será revisado por el centro de estudiantes.</p>
+        <p class="intro">Informá sobre una situación que necesite atención. Podés adjuntar hasta 3 fotos (galería o cámara). El reporte es anónimo y será revisado por el centro de estudiantes.</p>
 
         <form id="form-problema" class="form form-report">
           <div class="form-report-card">
@@ -44,6 +44,12 @@
               <label for="content">Descripción del problema (máx. 700 caracteres)</label>
               <textarea id="content" name="content" rows="8" maxlength="700" required placeholder="Describe el problema de forma clara..."></textarea>
               <span class="char-counter char-counter-report"><span id="char-count">0</span> / 700</span>
+            </div>
+            <div class="form-group">
+              <label for="problem-images">Fotos (opcional, máx. 3)</label>
+              <input type="file" id="problem-images" name="images" accept="image/jpeg,image/png,image/webp,image/gif" multiple class="report-input-file">
+              <p class="report-images-hint">En el celular podés elegir cámara o galería. Las imágenes se comprimen antes de subir.</p>
+              <div id="problem-images-preview" class="report-images-preview hidden" aria-live="polite"></div>
             </div>
           </div>
           <div id="form-message" class="form-message" aria-live="polite"></div>
@@ -70,7 +76,10 @@
       if (window.location.protocol === 'file:') {
         document.getElementById('file-protocol-warning').classList.remove('hidden');
       }
-      initForm('problema', 'form-problema', 'content', 'char-count', 'submit-btn');
+      initForm('problema', 'form-problema', 'content', 'char-count', 'submit-btn', {
+        inputId: 'problem-images',
+        previewId: 'problem-images-preview'
+      });
     });
   </script>
   <script src="/js/pwa.js"></script>
