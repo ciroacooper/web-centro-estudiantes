@@ -168,9 +168,44 @@ const SUBMIT_COOLDOWN_MS = 5000; // Evita spam: mínimo 5 segundos entre envíos
 /** Opciones solo para type === 'problema': fotos desde galería o cámara */
 const MAX_REPORT_IMAGES = 3;
 const MAX_IMAGE_BYTES_BEFORE_COMPRESS = 8 * 1024 * 1024;
+/** Si no se puede comprimir (HEIC en Chrome, tipo vacío, etc.), subimos el archivo tal cual hasta este tamaño */
+const MAX_RAW_IMAGE_BYTES = 6 * 1024 * 1024;
+
+function isLikelyImageFile(file) {
+  if (file.type && file.type.startsWith('image/')) return true;
+  const n = (file.name || '').toLowerCase();
+  return /\.(jpe?g|png|gif|webp|heic|heif|bmp)$/i.test(n);
+}
+
+function guessImageExt(file) {
+  const n = (file.name || '').toLowerCase();
+  if (n.endsWith('.heic')) return 'heic';
+  if (n.endsWith('.heif')) return 'heif';
+  if (n.endsWith('.png')) return 'png';
+  if (n.endsWith('.webp')) return 'webp';
+  if (n.endsWith('.gif')) return 'gif';
+  if (file.type === 'image/png') return 'png';
+  if (file.type === 'image/webp') return 'webp';
+  if (file.type === 'image/heic' || file.type === 'image/heif') return 'heic';
+  return 'jpg';
+}
+
+function mimeForExt(ext) {
+  const map = {
+    jpg: 'image/jpeg',
+    jpeg: 'image/jpeg',
+    png: 'image/png',
+    webp: 'image/webp',
+    gif: 'image/gif',
+    heic: 'image/heic',
+    heif: 'image/heif',
+    bmp: 'image/bmp'
+  };
+  return map[ext] || 'image/jpeg';
+}
 
 /**
- * Comprime una imagen a JPEG (ancho máx. 1920 px) para ahorrar datos en celular
+ * Comprime una imagen a JPEG (ancho máx. 1920 px). Falla en HEIC en muchos navegadores → usar prepareImageForUpload.
  */
 function compressImageToJpegBlob(file, maxDim, quality) {
   return new Promise((resolve, reject) => {
@@ -180,6 +215,10 @@ function compressImageToJpegBlob(file, maxDim, quality) {
       URL.revokeObjectURL(url);
       let w = img.naturalWidth;
       let h = img.naturalHeight;
+      if (!w || !h) {
+        reject(new Error('decode'));
+        return;
+      }
       if (w > maxDim || h > maxDim) {
         if (w >= h) {
           h = Math.round((h * maxDim) / w);
@@ -194,14 +233,14 @@ function compressImageToJpegBlob(file, maxDim, quality) {
       canvas.height = h;
       const ctx = canvas.getContext('2d');
       if (!ctx) {
-        reject(new Error('No se pudo procesar la imagen'));
+        reject(new Error('decode'));
         return;
       }
       ctx.drawImage(img, 0, 0, w, h);
       canvas.toBlob(
         (blob) => {
           if (blob) resolve(blob);
-          else reject(new Error('No se pudo comprimir la imagen'));
+          else reject(new Error('decode'));
         },
         'image/jpeg',
         quality
@@ -209,26 +248,50 @@ function compressImageToJpegBlob(file, maxDim, quality) {
     };
     img.onerror = () => {
       URL.revokeObjectURL(url);
-      reject(new Error('No se pudo leer la imagen'));
+      reject(new Error('decode'));
     };
     img.src = url;
   });
+}
+
+/**
+ * Sube la imagen al Storage. Fotos ≤ MAX_RAW_IMAGE_BYTES van en crudo (evita fallos de canvas/toBlob en algunos móviles).
+ * Solo se comprime cuando hace falta bajar el tamaño (> 6 MB y ≤ límite previo).
+ */
+async function prepareImageForUpload(file) {
+  if (file.type === 'image/gif' || guessImageExt(file) === 'gif') {
+    return { body: file, ext: 'gif', contentType: 'image/gif' };
+  }
+  if (file.size <= MAX_RAW_IMAGE_BYTES) {
+    const ext = guessImageExt(file);
+    const contentType =
+      file.type && file.type.startsWith('image/') ? file.type : mimeForExt(ext);
+    return { body: file, ext, contentType };
+  }
+  try {
+    const blob = await compressImageToJpegBlob(file, 1920, 0.82);
+    if (blob.size > MAX_RAW_IMAGE_BYTES) {
+      throw new Error('decode');
+    }
+    return { body: blob, ext: 'jpg', contentType: 'image/jpeg' };
+  } catch {
+    throw new Error(
+      'Esta foto no se pudo comprimir en el navegador y pesa más de 6 MB. En el iPhone: Ajustes → Cámara → Formatos → "Más compatible". O elegí una foto JPG/PNG más chica.'
+    );
+  }
 }
 
 async function uploadReportImagesToStorage(client, files) {
   const urls = [];
   for (let i = 0; i < files.length; i++) {
     const file = files[i];
-    if (!file.type.startsWith('image/')) {
-      throw new Error('Solo se permiten archivos de imagen (JPEG, PNG, WebP, GIF).');
+    if (!isLikelyImageFile(file)) {
+      throw new Error('Solo se permiten archivos de imagen (JPEG, PNG, WebP, GIF, HEIC, etc.).');
     }
     if (file.size > MAX_IMAGE_BYTES_BEFORE_COMPRESS) {
       throw new Error('Alguna imagen es demasiado grande (máx. 8 MB antes de comprimir).');
     }
-    const isGif = file.type === 'image/gif';
-    const body = isGif ? file : await compressImageToJpegBlob(file, 1920, 0.82);
-    const ext = isGif ? 'gif' : 'jpg';
-    const contentType = isGif ? 'image/gif' : 'image/jpeg';
+    const { body, ext, contentType } = await prepareImageForUpload(file);
     const id =
       typeof crypto !== 'undefined' && crypto.randomUUID
         ? crypto.randomUUID()
@@ -239,9 +302,16 @@ async function uploadReportImagesToStorage(client, files) {
       upsert: false
     });
     if (upErr) {
-      if (upErr.message && upErr.message.includes('Bucket not found')) {
+      console.error('Storage upload error:', upErr);
+      const raw = `${upErr.message || ''} ${upErr.error || ''} ${upErr.statusCode || ''}`.toLowerCase();
+      if (raw.includes('bucket not found') || raw.includes('404')) {
         throw new Error(
-          'Falta configurar el bucket de fotos en Supabase. Ejecutá supabase/storage-report-images.sql y creá el bucket report-images.'
+          'Falta el bucket de fotos en Supabase. En el panel: Storage → New bucket → nombre e id: report-images → público. Luego ejecutá supabase/storage-report-images.sql en el SQL Editor del mismo proyecto (misma URL que en js/config.js).'
+        );
+      }
+      if (raw.includes('row-level security') || raw.includes('policy') || raw.includes('rls')) {
+        throw new Error(
+          'La subida de fotos está bloqueada por políticas en Supabase. Ejecutá supabase/storage-report-images.sql en el SQL Editor (políticas de Storage para report-images).'
         );
       }
       throw new Error(upErr.message || 'Error al subir una foto');
@@ -276,7 +346,18 @@ function initForm(type, formId, contentId, charCountId, submitBtnId, imageOption
       wrap.className = 'report-image-preview-item';
       const img = document.createElement('img');
       img.alt = '';
-      img.src = URL.createObjectURL(f);
+      const objUrl = URL.createObjectURL(f);
+      img.src = objUrl;
+      img.onload = () => URL.revokeObjectURL(objUrl);
+      img.onerror = () => {
+        URL.revokeObjectURL(objUrl);
+        wrap.innerHTML = '';
+        const span = document.createElement('span');
+        span.className = 'report-image-preview-fallback';
+        span.textContent = 'Foto';
+        span.title = 'Vista previa no disponible en este navegador; igual se intentará subir';
+        wrap.appendChild(span);
+      };
       wrap.appendChild(img);
       previewEl.appendChild(wrap);
     });
@@ -350,7 +431,21 @@ function initForm(type, formId, contentId, charCountId, submitBtnId, imageOption
       let imageUrls = [];
       if (imageFiles.length) {
         showMessage('form-message', 'Subiendo fotos...', false);
-        imageUrls = await uploadReportImagesToStorage(client, imageFiles);
+        try {
+          imageUrls = await uploadReportImagesToStorage(client, imageFiles);
+        } catch (uploadErr) {
+          console.error('Error al subir fotos:', uploadErr);
+          const detail = uploadErr.message || 'Error desconocido';
+          const sendTextOnly = window.confirm(
+            `No se pudieron subir las fotos.\n\n${detail}\n\n¿Enviar el reporte solo con el texto (sin fotos)?`
+          );
+          if (!sendTextOnly) {
+            showMessage('form-message', detail, true);
+            return;
+          }
+          imageUrls = [];
+          showMessage('form-message', 'Enviando solo el texto del reporte...', false);
+        }
       }
 
       const row = {
@@ -379,7 +474,10 @@ function initForm(type, formId, contentId, charCountId, submitBtnId, imageOption
         throw error;
       }
 
-      showMessage('form-message', '¡Enviado correctamente! Será revisado por el centro de estudiantes.', false);
+      const okMsg = imageFiles.length && !row.image_urls
+        ? '¡Enviado el texto! Las fotos no se pudieron subir: revisá Storage en Supabase (bucket report-images) y volvé a intentar con fotos.'
+        : '¡Enviado correctamente! Será revisado por el centro de estudiantes.';
+      showMessage('form-message', okMsg, false);
       lastSubmitTime = Date.now();
       contentInput.value = '';
       charCountSpan.textContent = '0';
@@ -390,6 +488,10 @@ function initForm(type, formId, contentId, charCountId, submitBtnId, imageOption
     } catch (err) {
       console.error('Error al enviar:', err);
       let msg = err.message || 'Hubo un error al enviar. Intentá de nuevo más tarde.';
+      if (msg === 'decode' || /(^|[^a-z])decode([^a-z]|$)/i.test(msg)) {
+        msg =
+          'No pudimos procesar esa foto en el navegador. Probá con otra imagen, exportá como JPG, o actualizá la página (recarga forzada).';
+      }
       if (err.message?.includes('Failed to fetch') || err.message?.includes('NetworkError') || err.name === 'TypeError') {
         msg = 'Error de conexión. Si abrís la página como archivo (file://), probá con un servidor local (ej. npx serve) o subí el sitio a Netlify/Vercel.';
       }

@@ -3,6 +3,8 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+  <meta http-equiv="Pragma" content="no-cache">
   <title>Reportar problema - Centro de Estudiantes</title>
   <link rel="manifest" href="/manifest.json">
   <meta name="theme-color" content="#2563eb">
@@ -47,8 +49,8 @@
             </div>
             <div class="form-group">
               <label for="problem-images">Fotos (opcional, máx. 3)</label>
-              <input type="file" id="problem-images" name="images" accept="image/jpeg,image/png,image/webp,image/gif" multiple class="report-input-file">
-              <p class="report-images-hint">En el celular podés elegir cámara o galería. Las imágenes se comprimen antes de subir.</p>
+              <input type="file" id="problem-images" name="images" accept="image/*" multiple class="report-input-file">
+              <p class="report-images-hint">En el celular podés elegir cámara o galería. Fotos de hasta 6 MB se suben tal cual; las más pesadas se intentan comprimir. HEIC u otros formatos raros pueden subirse sin comprimir si el navegador no los procesa. <strong>Si este texto no menciona “6 MB”</strong>, el navegador está usando una versión vieja: probá “sitio en incógnito” o borrá datos/cache de esta página.</p>
               <div id="problem-images-preview" class="report-images-preview hidden" aria-live="polite"></div>
             </div>
           </div>
@@ -69,8 +71,8 @@
   </footer>
 
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-  <script src="js/config.js"></script>
-  <script src="js/forms.js"></script>
+  <script src="js/config.js?v=20260117"></script>
+  <script src="js/forms.js?v=20260117"></script>
   <script>
     document.addEventListener('DOMContentLoaded', () => {
       if (window.location.protocol === 'file:') {

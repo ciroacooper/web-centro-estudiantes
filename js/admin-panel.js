@@ -51,7 +51,7 @@ async function initPanel(listId, loadingId, emptyId, filterTypeId, filterStatusI
     const client = getSupabase();
     let query = client
       .from('submissions')
-      .select('id, type, content, status, created_at, deleted_at, image_urls')
+      .select('*')
       .is('deleted_at', null)
       .order('created_at', { ascending: false });
 
@@ -218,7 +218,7 @@ async function initDetalle(
     submission = DEMO_SUBMISSIONS.find(s => s.id === id);
     error = submission ? null : { message: 'No encontrado' };
   } else {
-    const result = await client.from('submissions').select('id, type, content, status, created_at, deleted_at, image_urls').eq('id', id).single();
+    const result = await client.from('submissions').select('*').eq('id', id).single();
     submission = result.data;
     error = result.error;
   }
@@ -942,7 +942,7 @@ async function initPapelera(listId, loadingId, emptyId) {
 
     const { data, error } = await client
       .from('submissions')
-      .select('id, type, content, status, created_at, deleted_at, image_urls')
+      .select('*')
       .not('deleted_at', 'is', null)
       .order('deleted_at', { ascending: false });
 
