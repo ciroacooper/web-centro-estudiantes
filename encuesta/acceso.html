@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Acceso · Encuestas - Centro de Estudiantes</title>
+  <link rel="manifest" href="/manifest.json">
+  <meta name="theme-color" content="#2563eb">
+  <link rel="icon" type="image/png" sizes="192x192" href="../assets/icons/icon-192.png">
+  <link rel="stylesheet" href="../css/styles.css">
+</head>
+<body data-encuesta-page="acceso">
+  <header class="header">
+    <div class="container">
+      <h1 class="logo"><a href="../index.html" class="logo-wrapper"><img src="../assets/logo.png" alt="Delegados E.P.E.T N°21" class="logo-img"></a></h1>
+      <nav class="nav">
+        <a href="../index.html">Inicio</a>
+        <a href="../explorar.html">Explorar</a>
+        <a href="../enviar-idea.html">Enviar idea</a>
+        <a href="../reportar-problema.html">Reportar problema</a>
+        <a href="../proyectos.html">Proyectos</a>
+        <a href="../descargar-app.html">Descargar app</a>
+        <a href="../contacto.html">Contacto</a>
+        <button type="button" id="theme-toggle" class="theme-toggle" role="switch" aria-checked="false" aria-label="Fondo blanco. Pulsá para el fondo negro"><span class="theme-toggle-label">white</span><span class="theme-toggle-knob"></span></button>
+      </nav>
+    </div>
+  </header>
+
+  <main class="main">
+    <section class="content-section">
+      <div class="container container-narrow">
+        <div id="file-protocol-warning" class="protocol-warning hidden" role="alert">
+          <strong>Serví la carpeta del proyecto</strong> y abrí el sitio por <code>http://localhost</code>, no como archivo suelto.
+        </div>
+
+        <p class="encuesta-paso">Paso 1 de 4 · Acceso</p>
+        <h2 class="page-title">Encuestas</h2>
+
+        <h3 class="demo-encuesta-subtitle">Acceso con contraseña</h3>
+        <form id="form-encuesta-acceso" class="form form-report">
+          <div class="form-report-card">
+            <div class="form-group">
+              <label for="encuesta-password">Contraseña de la demo</label>
+              <input type="password" id="encuesta-password" name="encuesta-password" autocomplete="current-password" required placeholder="Contraseña">
+            </div>
+          </div>
+          <div id="encuesta-acceso-msg" class="form-message" aria-live="polite"></div>
+          <div class="encuesta-nav-actions">
+            <a href="index.html" class="btn btn-secondary">Atrás</a>
+            <button type="submit" class="btn btn-primary">Continuar</button>
+          </div>
+        </form>
+      </div>
+    </section>
+  </main>
+
+  <script src="../js/theme.js"></script>
+  <script src="../js/nav-drawer.js"></script>
+  <footer class="footer">
+    <div class="container">
+      <p>Centro de Estudiantes - Escuela Técnica</p>
+      <p><a href="../admin/index.html" class="footer-admin-link">Acceso a la administración</a></p>
+    </div>
+  </footer>
+  <script src="../js/encuesta-config.js"></script>
+  <script src="../js/encuesta-flow.js"></script>
+  <script src="/js/pwa.js"></script>
+</body>
+</html>

@@ -21,9 +21,10 @@
         <a href="../explorar.html">Explorar</a>
         <a href="../descargar-app.html">Descargar app</a>
         <a href="panel.html">Panel admin</a>
+        <a href="encuestas.html">Encuestas</a>
         <a href="proyectos.html" class="active">Proyectos</a>
         <a href="papelera.html">Papelera</a>
-        <button type="button" id="theme-toggle" class="theme-toggle" role="switch" aria-checked="false" aria-label="Fondo blanco. Clic para fondo negro"><span class="theme-toggle-label">white</span><span class="theme-toggle-knob"></span></button>
+        <button type="button" id="theme-toggle" class="theme-toggle" role="switch" aria-checked="false" aria-label="Fondo blanco. Pulsá para el fondo negro"><span class="theme-toggle-label">white</span><span class="theme-toggle-knob"></span></button>
         <button type="button" class="btn btn-link" id="logout-btn">Cerrar sesión</button>
       </nav>
     </div>
@@ -72,7 +73,7 @@
 
         <div id="projects-loading" class="loading">Cargando proyectos...</div>
         <div id="projects-list" class="projects-admin-list"></div>
-        <div id="projects-empty" class="empty-state hidden">No hay proyectos aún. Clic en "Nuevo proyecto" para agregar uno.</div>
+        <div id="projects-empty" class="empty-state hidden">No hay proyectos aún. Pulsá en «Nuevo proyecto» para agregar uno.</div>
       </div>
     </section>
   </main>
@@ -85,6 +86,7 @@
 
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script src="../js/theme.js"></script>
+  <script src="../js/nav-drawer.js"></script>
   <script src="../js/config.js"></script>
   <script src="../js/admin-auth.js"></script>
   <script src="../js/admin-projects.js"></script>

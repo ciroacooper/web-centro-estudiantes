@@ -28,11 +28,12 @@ function getSupabase() {
 async function checkIsAdmin() {
   const client = getSupabase();
   const { data: { user } } = await client.auth.getUser();
-  if (!user) return false;
+  if (!user) {
+    return false;
+  }
 
   const { data, error } = await client.rpc('check_if_admin');
-  if (error || data !== true) return false;
-  return true;
+  return !error && data === true;
 }
 
 /**

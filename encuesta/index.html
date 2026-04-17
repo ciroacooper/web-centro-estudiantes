@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Próximamente · Centro de Estudiantes</title>
+  <link rel="manifest" href="/manifest.json">
+  <meta name="theme-color" content="#2563eb">
+  <link rel="icon" type="image/png" sizes="192x192" href="../assets/icons/icon-192.png">
+  <link rel="stylesheet" href="../css/styles.css">
+</head>
+<body>
+  <header class="header">
+    <div class="container">
+      <h1 class="logo"><a href="../index.html" class="logo-wrapper"><img src="../assets/logo.png" alt="Delegados E.P.E.T N°21" class="logo-img"></a></h1>
+      <nav class="nav">
+        <a href="../index.html">Inicio</a>
+        <a href="../explorar.html">Explorar</a>
+        <a href="../enviar-idea.html">Enviar idea</a>
+        <a href="../reportar-problema.html">Reportar problema</a>
+        <a href="../proyectos.html">Proyectos</a>
+        <a href="../descargar-app.html">Descargar app</a>
+        <a href="../contacto.html">Contacto</a>
+        <button type="button" id="theme-toggle" class="theme-toggle" role="switch" aria-checked="false" aria-label="Fondo blanco. Pulsá para el fondo negro"><span class="theme-toggle-label">white</span><span class="theme-toggle-knob"></span></button>
+      </nav>
+    </div>
+  </header>
+
+  <main class="main">
+    <section class="content-section">
+      <div class="container container-narrow">
+        <div id="file-protocol-warning" class="protocol-warning hidden" role="alert">
+          <strong>Serví la carpeta del proyecto</strong> (por ejemplo <code>python -m http.server 3000</code>) y abrí <code>http://localhost:3000/encuesta/index.html</code>.
+        </div>
+
+        <div class="encuesta-proximamente" role="region" aria-labelledby="encuesta-proximamente-title">
+          <p id="encuesta-proximamente-title" class="encuesta-proximamente-huge">Próximamente</p>
+          <p class="encuesta-proximamente-desc">
+            Estamos preparando algo grande, ¿Están listos?
+          </p>
+          <a href="../explorar.html" class="encuesta-proximamente-pill" title="Volver a Explorar">Seguir explorando</a>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <script src="../js/theme.js"></script>
+  <script src="../js/nav-drawer.js"></script>
+  <footer class="footer">
+    <div class="container">
+      <p>Centro de Estudiantes - Escuela Técnica</p>
+      <p><a href="../admin/index.html" class="footer-admin-link">Acceso a la administración</a></p>
+    </div>
+  </footer>
+  <script src="/js/pwa.js"></script>
+</body>
+</html>

@@ -137,7 +137,7 @@ function validateContent(content) {
   if (prohibitedWords.length > 0) {
     return { 
       valid: false, 
-      error: 'El contenido contiene palabras o frases inapropiadas. Por favor, utiliza un lenguaje respetuoso.' 
+      error: 'El contenido contiene palabras o frases inapropiadas. Por favor, usá un lenguaje respetuoso.' 
     };
   }
   
@@ -183,7 +183,7 @@ function initForm(type, formId, contentId, charCountId, submitBtnId) {
     const prohibitedWords = detectProhibitedWords(contentInput.value);
     if (prohibitedWords.length > 0) {
       contentInput.style.borderColor = 'var(--color-error)';
-      showMessage('form-message', '⚠️ El texto contiene palabras inapropiadas. Por favor, utiliza un lenguaje respetuoso.', true);
+      showMessage('form-message', '⚠️ El texto contiene palabras inapropiadas. Por favor, usá un lenguaje respetuoso.', true);
     } else {
       contentInput.style.borderColor = '';
       const messageEl = document.getElementById('form-message');

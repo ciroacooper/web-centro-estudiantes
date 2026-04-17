@@ -53,7 +53,7 @@
     var label = btn.querySelector('.theme-toggle-label');
     if (label) label.textContent = isDark() ? 'black' : 'white';
     btn.setAttribute('aria-checked', isDark() ? 'true' : 'false');
-    btn.setAttribute('aria-label', isDark() ? 'Fondo negro activo. Clic para fondo blanco' : 'Fondo blanco. Clic para fondo negro');
+    btn.setAttribute('aria-label', isDark() ? 'Fondo negro activo. Pulsá para el fondo blanco' : 'Fondo blanco. Pulsá para el fondo negro');
     if (isDark()) btn.classList.add('theme-toggle-on'); else btn.classList.remove('theme-toggle-on');
   }
 
