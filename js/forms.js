@@ -205,9 +205,9 @@ function mimeForExt(ext) {
 }
 
 /**
- * Comprime una imagen a JPEG (ancho máx. 1920 px). Falla en HEIC en muchos navegadores → usar prepareImageForUpload.
+ * Decodifica la imagen en un canvas y la exporta (WebP o JPEG según mime). Máx. ancho/alto maxDim px.
  */
-function compressImageToJpegBlob(file, maxDim, quality) {
+function compressImageOnCanvasToBlob(file, maxDim, mimeType, quality) {
   return new Promise((resolve, reject) => {
     const img = new Image();
     const url = URL.createObjectURL(file);
@@ -239,10 +239,10 @@ function compressImageToJpegBlob(file, maxDim, quality) {
       ctx.drawImage(img, 0, 0, w, h);
       canvas.toBlob(
         (blob) => {
-          if (blob) resolve(blob);
+          if (blob && blob.size > 0) resolve(blob);
           else reject(new Error('decode'));
         },
-        'image/jpeg',
+        mimeType,
         quality
       );
     };
@@ -255,30 +255,42 @@ function compressImageToJpegBlob(file, maxDim, quality) {
 }
 
 /**
- * Sube la imagen al Storage. Fotos ≤ MAX_RAW_IMAGE_BYTES van en crudo (evita fallos de canvas/toBlob en algunos móviles).
- * Solo se comprime cuando hace falta bajar el tamaño (> 6 MB y ≤ límite previo).
+ * Convierte a WebP (prioritario) o JPEG si el navegador no exporta WebP; GIF sin tocar.
+ * Si no se puede codificar y el archivo pesa ≤ 6 MB, se sube el original.
  */
 async function prepareImageForUpload(file) {
   if (file.type === 'image/gif' || guessImageExt(file) === 'gif') {
     return { body: file, ext: 'gif', contentType: 'image/gif' };
   }
-  if (file.size <= MAX_RAW_IMAGE_BYTES) {
-    const ext = guessImageExt(file);
-    const contentType =
-      file.type && file.type.startsWith('image/') ? file.type : mimeForExt(ext);
-    return { body: file, ext, contentType };
-  }
-  try {
-    const blob = await compressImageToJpegBlob(file, 1920, 0.82);
-    if (blob.size > MAX_RAW_IMAGE_BYTES) {
-      throw new Error('decode');
+  const chain = [
+    ['image/webp', 0.82],
+    ['image/webp', 0.72],
+    ['image/jpeg', 0.82],
+    ['image/jpeg', 0.72],
+  ];
+  for (const [mime, q] of chain) {
+    try {
+      const blob = await compressImageOnCanvasToBlob(file, 1920, mime, q);
+      if (blob.size <= MAX_RAW_IMAGE_BYTES) {
+        return {
+          body: blob,
+          ext: mime === 'image/webp' ? 'webp' : 'jpg',
+          contentType: mime,
+        };
+      }
+    } catch {
+      /* siguiente formato o calidad */
     }
-    return { body: blob, ext: 'jpg', contentType: 'image/jpeg' };
-  } catch {
+  }
+  if (file.size > MAX_RAW_IMAGE_BYTES) {
     throw new Error(
       'Esta foto no se pudo comprimir en el navegador y pesa más de 6 MB. En el iPhone: Ajustes → Cámara → Formatos → "Más compatible". O elegí una foto JPG/PNG más chica.'
     );
   }
+  const ext = guessImageExt(file);
+  const contentType =
+    file.type && file.type.startsWith('image/') ? file.type : mimeForExt(ext);
+  return { body: file, ext, contentType };
 }
 
 async function uploadReportImagesToStorage(client, files) {
@@ -320,6 +332,69 @@ async function uploadReportImagesToStorage(client, files) {
     if (pub && pub.publicUrl) urls.push(pub.publicUrl);
   }
   return urls;
+}
+
+function blobToBase64Payload(blob) {
+  return new Promise((resolve, reject) => {
+    const fr = new FileReader();
+    fr.onload = () => {
+      const s = String(fr.result || '');
+      const i = s.indexOf(',');
+      resolve(i >= 0 ? s.slice(i + 1) : s);
+    };
+    fr.onerror = () => reject(new Error('No se pudo leer la miniatura para verificación.'));
+    fr.readAsDataURL(blob);
+  });
+}
+
+/**
+ * Llama a la Edge Function verify-report (Groq). Requiere USE_AI_MODERATION en config.js.
+ * Las imágenes se envían como miniaturas JPEG (512 px) para no exceder límites del body.
+ */
+async function verifyContentWithGroqEdge(text, imageFiles) {
+  if (typeof USE_AI_MODERATION === 'undefined' || !USE_AI_MODERATION) {
+    return { ok: true };
+  }
+  if (!SUPABASE_URL || !SUPABASE_ANON_KEY) {
+    return { ok: true };
+  }
+  const images = [];
+  const files = Array.isArray(imageFiles) ? imageFiles : [];
+  for (const file of files.slice(0, MAX_REPORT_IMAGES)) {
+    if (file.type === 'image/gif' || guessImageExt(file) === 'gif') {
+      continue;
+    }
+    try {
+      const blob = await compressImageOnCanvasToBlob(file, 512, 'image/jpeg', 0.72);
+      const data = await blobToBase64Payload(blob);
+      images.push({ mimeType: 'image/jpeg', data });
+    } catch (e) {
+      console.warn('Miniatura para moderación omitida', e);
+    }
+  }
+  const endpoint = `${String(SUPABASE_URL).replace(/\/$/, '')}/functions/v1/verify-report`;
+  const res = await fetch(endpoint, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      Authorization: `Bearer ${SUPABASE_ANON_KEY}`,
+      apikey: SUPABASE_ANON_KEY,
+    },
+    body: JSON.stringify({ text, images }),
+  });
+  let json;
+  try {
+    json = await res.json();
+  } catch {
+    throw new Error('Respuesta inválida del servidor de verificación.');
+  }
+  if (!res.ok) {
+    throw new Error(json.reason || json.error || `Verificación falló (${res.status})`);
+  }
+  if (typeof json.ok !== 'boolean') {
+    throw new Error('Respuesta de verificación incompleta.');
+  }
+  return json;
 }
 
 /**
@@ -415,7 +490,6 @@ function initForm(type, formId, contentId, charCountId, submitBtnId, imageOption
     // Guardar el contenido validado (la sanitización se hace al mostrar en el admin)
     const contentToSend = validation.value;
     submitBtn.disabled = true;
-    showMessage('form-message', imageFiles.length ? 'Subiendo fotos...' : 'Enviando...', false);
 
     try {
       if (typeof supabase === 'undefined') {
@@ -423,8 +497,21 @@ function initForm(type, formId, contentId, charCountId, submitBtnId, imageOption
       }
       if (!SUPABASE_URL || !SUPABASE_ANON_KEY ||
           SUPABASE_URL.includes('TU_PROYECTO') || SUPABASE_ANON_KEY.includes('TU_ANON')) {
-        throw new Error('Supabase no está configurado. Editá js/config.js con la URL y la anon key de tu proyecto en supabase.com');
+        throw new Error(
+          'Supabase no está configurado. Editá js/config.js o js/config.local.js con la URL y la clave pública (anon o publishable) del proyecto en supabase.com.'
+        );
       }
+
+      if (typeof USE_AI_MODERATION !== 'undefined' && USE_AI_MODERATION) {
+        showMessage('form-message', 'Verificando contenido...', false);
+        const mod = await verifyContentWithGroqEdge(contentToSend, imageFiles);
+        if (!mod.ok) {
+          showMessage('form-message', mod.reason || 'El contenido no cumple las normas de uso.', true);
+          return;
+        }
+      }
+
+      showMessage('form-message', imageFiles.length ? 'Subiendo fotos...' : 'Enviando...', false);
 
       const client = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
@@ -469,7 +556,9 @@ function initForm(type, formId, contentId, charCountId, submitBtnId, imageOption
           );
         }
         if (error.code === 'PGRST301' || error.message?.includes('JWT')) {
-          throw new Error('La anon key es inválida. Verificá js/config.js con la clave de Settings > API en Supabase.');
+          throw new Error(
+            'La clave pública de Supabase (anon o publishable) no es válida para este proyecto. Revisá Settings → API en el dashboard y js/config.js o js/config.local.js.'
+          );
         }
         throw error;
       }

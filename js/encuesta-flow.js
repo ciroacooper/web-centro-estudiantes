@@ -194,7 +194,8 @@ function initEncuestaComentario() {
     if (!SUPABASE_URL || !SUPABASE_ANON_KEY ||
         String(SUPABASE_URL).includes('TU_PROYECTO') || String(SUPABASE_ANON_KEY).includes('TU_ANON')) {
       if (msg) {
-        msg.textContent = 'Supabase no está configurado. Editá js/config.js y ejecutá supabase/survey-schema.sql en el proyecto.';
+        msg.textContent =
+          'Supabase no está configurado. Editá js/config.js o js/config.local.js y ejecutá supabase/survey-schema.sql en el proyecto.';
         msg.className = 'form-message form-message-error';
       }
       return;

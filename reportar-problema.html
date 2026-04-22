@@ -50,7 +50,7 @@
             <div class="form-group">
               <label for="problem-images">Fotos (opcional, máx. 3)</label>
               <input type="file" id="problem-images" name="images" accept="image/*" multiple class="report-input-file">
-              <p class="report-images-hint">En el celular podés elegir cámara o galería. Fotos de hasta 6 MB se suben tal cual; las más pesadas se intentan comprimir. HEIC u otros formatos raros pueden subirse sin comprimir si el navegador no los procesa. <strong>Si este texto no menciona “6 MB”</strong>, el navegador está usando una versión vieja: probá “sitio en incógnito” o borrá datos/cache de esta página.</p>
+              <p class="report-images-hint">En el celular podés elegir cámara o galería. Las fotos (salvo GIF) se convierten a <strong>WebP</strong> antes de subir; si el navegador no puede, se usa JPEG. Si no se puede procesar y la foto pesa hasta 6 MB, se sube el archivo original. <strong>Si este párrafo no habla de WebP</strong>, actualizá la página sin caché o probá en incógnito.</p>
               <div id="problem-images-preview" class="report-images-preview hidden" aria-live="polite"></div>
             </div>
           </div>
@@ -71,8 +71,9 @@
   </footer>
 
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="js/config.local.js"></script>
   <script src="js/config.js?v=20260117"></script>
-  <script src="js/forms.js?v=20260117"></script>
+  <script src="js/forms.js?v=20260202-groq"></script>
   <script>
     document.addEventListener('DOMContentLoaded', () => {
       if (window.location.protocol === 'file:') {
