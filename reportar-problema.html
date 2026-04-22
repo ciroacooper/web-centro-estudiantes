@@ -47,7 +47,7 @@
               <textarea id="content" name="content" rows="8" maxlength="700" required placeholder="Describe el problema de forma clara..."></textarea>
               <span class="char-counter char-counter-report"><span id="char-count">0</span> / 700</span>
             </div>
-            <div class="form-group">
+            <div class="form-group hidden" id="problem-images-group">
               <label for="problem-images">Fotos (opcional, máx. 3)</label>
               <input type="file" id="problem-images" name="images" accept="image/*" multiple class="report-input-file">
               <p class="report-images-hint">En el celular podés elegir cámara o galería. Las fotos (salvo GIF) se convierten a <strong>WebP</strong> antes de subir; si el navegador no puede, se usa JPEG. Si no se puede procesar y la foto pesa hasta 6 MB, se sube el archivo original. <strong>Si este párrafo no habla de WebP</strong>, actualizá la página sin caché o probá en incógnito.</p>
@@ -71,9 +71,9 @@
   </footer>
 
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-  <script src="js/config.local.js"></script>
-  <script src="js/config.js?v=20260117"></script>
-  <script src="js/forms.js?v=20260202-groq"></script>
+  <script src="js/config.local.js?v=20260422-images-off"></script>
+  <script src="js/config.js?v=20260422-images-off"></script>
+  <script src="js/forms.js?v=20260422-images-off"></script>
   <script>
     document.addEventListener('DOMContentLoaded', () => {
       if (window.location.protocol === 'file:') {
@@ -81,7 +81,9 @@
       }
       initForm('problema', 'form-problema', 'content', 'char-count', 'submit-btn', {
         inputId: 'problem-images',
-        previewId: 'problem-images-preview'
+        previewId: 'problem-images-preview',
+        groupId: 'problem-images-group',
+        disabledNoticeId: 'problem-images-disabled-notice'
       });
     });
   </script>

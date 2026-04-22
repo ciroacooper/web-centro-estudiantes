@@ -5,6 +5,7 @@
  *   SUPABASE_URL: 'https://TU_PROYECTO.supabase.co',
  *   SUPABASE_ANON_KEY: 'eyJ... o sb_publishable_...',
  *   TEST_MODE: false,
+ *   ENABLE_REPORT_IMAGES: true,
  *   USE_AI_MODERATION: true,
  * });
  *

@@ -398,19 +398,39 @@ async function verifyContentWithGroqEdge(text, imageFiles) {
 }
 
 /**
- * @param {object} [imageOptions] - solo para problemas: { inputId, previewId }
+ * @param {object} [imageOptions] - solo para problemas: { inputId, previewId, groupId, disabledNoticeId }
  */
 function initForm(type, formId, contentId, charCountId, submitBtnId, imageOptions) {
   const form = document.getElementById(formId);
   const contentInput = document.getElementById(contentId);
   const charCountSpan = document.getElementById(charCountId);
   const submitBtn = document.getElementById(submitBtnId);
-  const imageInput = imageOptions && imageOptions.inputId ? document.getElementById(imageOptions.inputId) : null;
+  const localCfg = (typeof window !== 'undefined' && window.CENTRO_CONFIG_LOCAL) || {};
+  const hasExplicitImageFlag = typeof ENABLE_REPORT_IMAGES !== 'undefined';
+  const fallbackLocalImageFlag = typeof localCfg.ENABLE_REPORT_IMAGES === 'boolean'
+    ? localCfg.ENABLE_REPORT_IMAGES
+    : true;
+  const reportImagesEnabled =
+    type !== 'problema' ||
+    (hasExplicitImageFlag ? ENABLE_REPORT_IMAGES : fallbackLocalImageFlag);
+  const imageInput = reportImagesEnabled && imageOptions && imageOptions.inputId
+    ? document.getElementById(imageOptions.inputId)
+    : null;
   const previewEl = imageOptions && imageOptions.previewId ? document.getElementById(imageOptions.previewId) : null;
+  const imageGroupEl = imageOptions && imageOptions.groupId ? document.getElementById(imageOptions.groupId) : null;
+  const imageDisabledNoticeEl = imageOptions && imageOptions.disabledNoticeId
+    ? document.getElementById(imageOptions.disabledNoticeId)
+    : null;
 
   if (!form || !contentInput || !charCountSpan || !submitBtn) return;
 
   let lastSubmitTime = 0;
+
+  if (type === 'problema' && !reportImagesEnabled) {
+    if (imageGroupEl) imageGroupEl.classList.add('hidden');
+    if (previewEl) previewEl.classList.add('hidden');
+    if (imageDisabledNoticeEl) imageDisabledNoticeEl.classList.remove('hidden');
+  }
 
   function renderImagePreview() {
     if (!previewEl || !imageInput) return;

@@ -18,6 +18,8 @@ const _CENTRO_DEFAULTS = {
   SUPABASE_ANON_KEY: 'sb_publishable_EMcmbLJAJN2RclVVkvR7Zg_SI6KjczB',
   /** Modo prueba: salta login y entra directo al panel. Poner false antes de publicar. */
   TEST_MODE: false,
+  /** Habilita adjuntar fotos en "Reportar problema". */
+  ENABLE_REPORT_IMAGES: true,
   /**
    * Moderación con Groq vía Edge Function `verify-report`.
    * La API de Groq NO va acá: solo en el servidor.
@@ -32,4 +34,5 @@ const _cfg = Object.assign({}, _CENTRO_DEFAULTS, window.CENTRO_CONFIG_LOCAL);
 const SUPABASE_URL = _cfg.SUPABASE_URL;
 const SUPABASE_ANON_KEY = _cfg.SUPABASE_ANON_KEY;
 const TEST_MODE = _cfg.TEST_MODE;
+const ENABLE_REPORT_IMAGES = _cfg.ENABLE_REPORT_IMAGES;
 const USE_AI_MODERATION = _cfg.USE_AI_MODERATION;

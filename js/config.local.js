@@ -5,4 +5,5 @@
  */
 window.CENTRO_CONFIG_LOCAL = Object.assign(window.CENTRO_CONFIG_LOCAL || {}, {
     USE_AI_MODERATION: true,
+    ENABLE_REPORT_IMAGES: false,
   });
